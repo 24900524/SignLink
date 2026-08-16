@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SignLink — Gesture to Speech</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="grid-field" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="brand-block">
+      <div class="brand">Sign<span>Link</span></div>
+      <div class="tagline">Live gesture-to-speech classroom bridge</div>
+    </div>
+    <div class="status-pill" id="statusPill"><span class="dot"></span><span id="statusText">Initializing AI…</span></div>
+  </header>
+
+  <main class="app">
+    <section class="hero">
+      <div>
+        <p class="eyebrow">ACCESSIBILITY × COMPUTER VISION — RUNS ENTIRELY IN YOUR BROWSER</p>
+        <h1>Let your hands<br><span>speak.</span></h1>
+        <p class="hero-copy">
+          Point your webcam at your hand. SignLink tracks it live, matches the shape against
+          a 12-gesture demo vocabulary, chains gestures into full sentences, and reads the
+          result aloud.
+        </p>
+      </div>
+      <div class="hero-badge">
+        <strong>ON&#8209;DEVICE</strong>
+        <span>21&#8209;point hand tracking</span>
+        <span>~30 fps inference</span>
+        <span>12 gestures · sentence mode</span>
+        <span>OpenCV.js edge trace</span>
+      </div>
+    </section>
+
+    <section class="workspace">
+      <div class="camera-card">
+        <div class="card-head">
+          <div>
+            <h2>Live Camera</h2>
+            <p>Place one hand fully inside the frame, palm toward the lens</p>
+          </div>
+          <button id="startBtn" disabled>Start Camera</button>
+        </div>
+
+        <div class="video-wrap" id="videoWrap">
+          <video id="video" autoplay playsinline muted></video>
+          <canvas id="overlay"></canvas>
+
+          <div class="viewfinder" aria-hidden="true">
+            <span class="corner tl"></span><span class="corner tr"></span>
+            <span class="corner bl"></span><span class="corner br"></span>
+          </div>
+          <div class="scan-line" id="scanLine"></div>
+
+          <div class="rec-badge" id="recBadge"><span class="rec-dot"></span>LIVE</div>
+          <div class="camera-overlay">
+            <span id="handStatus">Waiting for camera…</span>
+          </div>
+
+          <div class="cv-inset" id="cvInset">
+            <div class="cv-inset-head">
+              <span>OPENCV.JS EDGE TRACE</span>
+              <label class="cv-toggle">
+                <input type="checkbox" id="cvToggle" />
+                <span class="cv-toggle-track"><span class="cv-toggle-thumb"></span></span>
+              </label>
+            </div>
+            <canvas id="cvCanvas" width="160" height="120"></canvas>
+          </div>
+
+          <div class="caption-bar" id="captionBar">
+            <span class="caption-cursor">●</span>
+            <span id="captionText">Captions will appear here</span>
+          </div>
+        </div>
+
+        <div class="confidence-row">
+          <span>Recognition confidence</span>
+          <strong id="confidence" class="mono">—</strong>
+        </div>
+        <div class="eq" id="eq">
+          <!-- bars injected by JS -->
+        </div>
+      </div>
+
+      <div class="result-card">
+        <p class="eyebrow">TRANSLATION</p>
+        <div class="result-icon" id="resultIcon">✋</div>
+        <div class="result-label">Detected gesture</div>
+        <h2 id="gestureText">—</h2>
+        <p id="speechText">Start the camera and make a gesture.</p>
+
+        <button class="speak-btn" id="speakBtn" disabled>
+          🔊 Speak again
+        </button>
+
+        <div class="activity">
+          <div class="activity-head">
+            <span>Transcript</span>
+            <button id="clearBtn">Clear</button>
+          </div>
+          <div id="history" class="history">
+            <div class="empty">No translations yet</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sentence-card">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">SENTENCE BUILDER</p>
+          <h2>Chain gestures into a full sentence</h2>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="sentenceToggle" />
+          <span class="toggle-track"><span class="toggle-thumb"></span></span>
+          <span class="toggle-label" id="toggleLabel">Off</span>
+        </label>
+      </div>
+
+      <p class="note">
+        Turn this on, then hold each gesture for a moment to add its word to the sentence
+        below instead of speaking it right away. Build up a phrase, then speak the whole thing.
+      </p>
+
+      <div class="sentence-strip" id="sentenceStrip">
+        <span class="sentence-empty" id="sentenceEmpty">Turn on sentence mode, then hold gestures to add words here.</span>
+      </div>
+
+      <div class="suggestion" id="suggestion" hidden>
+        <span class="suggestion-label">Suggested sentence</span>
+        <span id="suggestionText"></span>
+        <button id="suggestionSpeak">🔊 Speak this instead</button>
+      </div>
+
+      <div class="sentence-actions">
+        <button id="speakSentenceBtn" disabled>🔊 Speak sentence</button>
+        <button id="undoWordBtn" class="ghost" disabled>Undo last word</button>
+        <button id="clearSentenceBtn" class="ghost" disabled>Clear</button>
+      </div>
+    </section>
+
+    <section class="demo-vocab">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">DEMO VOCABULARY — 12 GESTURES</p>
+          <h2>Gestures to demonstrate</h2>
+        </div>
+      </div>
+
+      <div class="vocab-grid">
+        <div class="vocab" data-key="Open_Palm"><span>✋</span><b>Open Palm</b><small>HELLO</small></div>
+        <div class="vocab" data-key="Thumb_Up"><span>👍</span><b>Thumb Up</b><small>YES</small></div>
+        <div class="vocab" data-key="Thumb_Down"><span>👎</span><b>Thumb Down</b><small>NO</small></div>
+        <div class="vocab" data-key="Closed_Fist"><span>✊</span><b>Closed Fist</b><small>HELP</small></div>
+        <div class="vocab" data-key="Victory"><span>✌️</span><b>Victory</b><small>THANK YOU*</small></div>
+        <div class="vocab" data-key="ILoveYou"><span>🤟</span><b>I Love You</b><small>I LOVE YOU</small></div>
+        <div class="vocab" data-key="Pointing_Up"><span>☝️</span><b>Pointing Up</b><small>WAIT</small></div>
+        <div class="vocab" data-key="OK_Sign"><span>👌</span><b>OK Sign</b><small>OKAY*</small></div>
+        <div class="vocab" data-key="Three"><span>🖖</span><b>Three Fingers</b><small>PLEASE*</small></div>
+        <div class="vocab" data-key="Four"><span>🖐️</span><b>Four Fingers</b><small>SORRY*</small></div>
+        <div class="vocab" data-key="Rock_On"><span>🤘</span><b>Rock On</b><small>STOP*</small></div>
+        <div class="vocab" data-key="Call_Me"><span>🤙</span><b>Call Me</b><small>CALL ME*</small></div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    SignLink prototype • Computer vision runs in the browser using MediaPipe Gesture Recognizer + a custom landmark classifier.
+  </footer>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
