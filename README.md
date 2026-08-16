@@ -178,14 +178,5 @@ UI. Everything below runs client-side in vanilla JS — no build step, no framew
 Everything above — video, landmarks, both classifiers, the OpenCV pipeline, and speech — runs
 entirely on-device in the browser; no camera frame or gesture data is ever sent to a server.
 
-## Next upgrade for the real project
-
-For a stronger hackathon version, collect/obtain a validated dataset for your target sign
-language, extract MediaPipe hand landmarks, train a classifier (for example Random Forest,
-SVM or a small neural network) instead of the geometric heuristics used here, then export the
-model for browser inference. Add temporal sequence recognition for signs that depend on
-movement rather than a single hand pose, and give the sentence builder real grammar (word
-order, tense) instead of a fixed lookup table of two-word phrases.
-
 Official MediaPipe web documentation:
 https://developers.google.com/edge/mediapipe/solutions/vision/gesture_recognizer/web_js
